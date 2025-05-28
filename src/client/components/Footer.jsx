@@ -5,11 +5,18 @@ const styles = {
     padding: '1rem',
     backgroundColor: '#f8f9fa',
     textAlign: 'center',
-    marginTop: 'auto'
+    position: 'fixed',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    width: '100%',
+    zIndex: 1000,
+    boxShadow: '0 -2px 4px rgba(0,0,0,0.1)'
   },
   text: {
     color: '#666',
-    fontSize: '0.9rem'
+    fontSize: '0.9rem',
+    margin: 0
   }
 };
 
