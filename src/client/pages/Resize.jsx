@@ -7,7 +7,13 @@ const Resize = () => {
   const [images, setImages] = useState(location.state?.files || []);
 
   const handleResize = () => {
-    // 이미지 리사이징 처리 후 Loading 페이지로 이동
+    // 이미지 리사이징 처리
+    const resizedImages = images.map(image => {
+      // 여기에 실제 리사이징 로직 추가
+      return image;
+    });
+    setImages(resizedImages);
+    // Loading 페이지로 이동
     navigate('/loading');
   };
 
