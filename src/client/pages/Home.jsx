@@ -1,6 +1,22 @@
 import React, { useState } from 'react';
 import LocationAnalysis from './LocationAnalysis';
 
+const API_CONFIG = {
+  MODEL: "gpt-4o",
+  MAX_TOKENS: 300,
+  ENDPOINT: 'https://api.openai.com/v1/chat/completions'
+};
+
+const ERROR_MESSAGES = {
+  API_KEY_MISSING: 'API 키가 설정되지 않았습니다.',
+  API_KEY_INVALID: 'API 키가 유효하지 않습니다.',
+  API_RATE_LIMIT: '요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요.',
+  API_ERROR: '서비스에 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.',
+  PARSE_ERROR: '응답을 처리하는 중 오류가 발생했습니다.',
+  INVALID_RESPONSE: '올바르지 않은 응답이 반환되었습니다.',
+  NO_FILE: '사진을 먼저 선택해주세요.'
+};
+
 const TripOnPage = () => {
   const [files, setFiles] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -183,29 +199,22 @@ const TripOnPage = () => {
     try {
       
       const requestBody = {
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: "이 여행 사진을 보고 촬영된 국가와 도시를 추론하고 한글로 주세요. 응답은 반드시 다음 JSON 형식으로만 해주세요. 마크다운이나 다른 형식은 사용하지 마세요: {\"country\": \"국가명\", \"city\": \"도시명\", \"confidence\": \"신뢰도(1-10)\"}"
-              },
-              {
-                type: "image_url",
-                image_url: {
-                  url: base64Image
-                }
-              }
-            ]
-          }
-        ],
-        max_tokens: 300
+        model: API_CONFIG.MODEL,
+        messages: [{
+          role: "user",
+          content: [{
+            type: "text",
+            text: "이 여행 사진을 보고 촬영된 국가와 도시를 추론해주세요. 응답은 반드시 다음 JSON 형식으로만 해주세요: {\"country\": \"국가명\", \"city\": \"도시명\", \"confidence\": \"신뢰도(1-10)\"}. 국가명과 도시명은 한글로 작성해주세요. 예시: {\"country\": \"프랑스\", \"city\": \"파리\", \"confidence\": \"8\"}"
+          }, {
+            type: "image_url",
+            image_url: { url: base64Image }
+          }]
+        }],
+        max_tokens: API_CONFIG.MAX_TOKENS
       };
       
 
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch(API_CONFIG.ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -243,7 +252,8 @@ const TripOnPage = () => {
       const content = data.choices[0].message.content;
       
       try {
-        const result = JSON.parse(content);
+        const cleanContent = content.replace(/```json\n|\n```/g, '').trim();
+        const result = JSON.parse(cleanContent);
         
         if (!result.country || !result.city) {
           throw new Error('INVALID_RESPONSE');
@@ -256,9 +266,22 @@ const TripOnPage = () => {
         throw new Error('PARSE_ERROR');
       }
     } catch (error) {
-      console.error('ChatGPT API 호출 중 오류:', error);
-      console.error('오류 스택:', error.stack);
-      throw error;
+      console.error('💥 분석 중 오류 발생:', error);
+      console.error('오류 메시지:', error.message);
+      
+      if (error.message === 'API_KEY_MISSING' || 
+          error.message === 'API_KEY_INVALID' || 
+          error.message === 'API_RATE_LIMIT' || 
+          error.message === 'API_ERROR' || 
+          error.message === 'PARSE_ERROR' || 
+          error.message === 'INVALID_RESPONSE') {
+        setError('현재 서비스 준비중입니다');
+      } else {
+        setError('현재 서비스 준비중입니다');
+      }
+    } finally {
+      console.log('🏁 분석 종료');
+      setIsAnalyzing(false);
     }
   };
 
@@ -285,7 +308,7 @@ const TripOnPage = () => {
 
   const handleConfirm = async () => {
     if (files.length === 0) {
-      setError('사진을 먼저 선택해주세요.');
+      setError(ERROR_MESSAGES.NO_FILE);
       return;
     }
 
@@ -362,7 +385,7 @@ const TripOnPage = () => {
       </div>
       
       {error && (
-        <div style={error === '현재 서비스 준비중입니다' ? styles.serviceUnavailableText : styles.errorText}>
+        <div style={error === ERROR_MESSAGES.API_ERROR ? styles.serviceUnavailableText : styles.errorText}>
           {error}
         </div>
       )}

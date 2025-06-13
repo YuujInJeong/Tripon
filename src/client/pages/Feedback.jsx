@@ -8,6 +8,7 @@ const Feedback = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const searchLocation = async (query) => {
     if (!query.trim()) {
@@ -16,6 +17,8 @@ const Feedback = () => {
     }
 
     setIsLoading(true);
+    setError(null);
+    
     try {
       const response = await axios.get(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=10`,
@@ -28,6 +31,8 @@ const Feedback = () => {
       setSearchResults(response.data);
     } catch (error) {
       console.error('위치 검색에 실패했습니다:', error);
+      setError('위치 검색 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      setSearchResults([]);
     } finally {
       setIsLoading(false);
     }
@@ -90,6 +95,22 @@ const Feedback = () => {
           color: 'rgba(13, 158, 209, 0.78)'
         }}>
           검색 중...
+        </div>
+      )}
+      
+      {error && (
+        <div style={{
+          position: 'absolute',
+          top: 166,
+          left: 60,
+          width: 283,
+          padding: '10px',
+          textAlign: 'center',
+          color: 'red',
+          background: 'rgba(255, 0, 0, 0.1)',
+          borderRadius: 5
+        }}>
+          {error}
         </div>
       )}
       
