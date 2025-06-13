@@ -1,29 +1,24 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import ImageUploader from '../components/ImageUploader';
+import '../styles/Resize.css';
 
 const Resize = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [images, setImages] = useState(location.state?.files || []);
+  const imageCount = location.state?.imageCount || 4;
 
-  const handleResize = () => {
-    navigate('/loading');
+  const handleImagesProcessed = (processedImages) => {
+    navigate('/collage', { state: { images: processedImages } });
   };
 
   return (
     <div className="resize-container">
       <h2>이미지 크기 조정</h2>
-      <div className="image-preview">
-        {images.map((image, index) => (
-          <div key={index} className="preview-item">
-            <img src={URL.createObjectURL(image)} alt={`Preview ${index}`} />
-            <div className="resize-controls">
-              {/* 리사이징 컨트롤 추가 */}
-            </div>
-          </div>
-        ))}
-      </div>
-      <button onClick={handleResize}>분석 시작</button>
+      <ImageUploader 
+        onImagesProcessed={handleImagesProcessed}
+        maxImages={imageCount}
+      />
     </div>
   );
 };
