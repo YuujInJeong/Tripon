@@ -127,6 +127,7 @@ const LocationAnalysis = ({ analysisResult, onBack }) => {
 
   return (
     <div style={styles.container}>
+      {showModal && <ImageCountModal onClose={() => setShowModal(false)} />}
       <div style={styles.titleContainer}>
         <p style={styles.titleHighlight}>✨ 분석 결과</p>
         <p style={styles.titleQuestion}>이 장소가 맞나요?</p>
@@ -163,7 +164,7 @@ const LocationAnalysis = ({ analysisResult, onBack }) => {
         </button>
         <button 
           style={styles.primaryButton} 
-          onClick={() => navigate('/modal')}
+          onClick={() => setShowModal(true)}
         >
           맞췄어요
         </button>
