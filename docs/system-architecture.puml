@@ -1,0 +1,47 @@
+@startuml Tripon System Architecture
+
+skinparam backgroundColor white
+skinparam handwritten false
+skinparam defaultFontName "Pretendard"
+skinparam defaultFontSize 14
+skinparam componentStyle uml2
+skinparam component {
+    BackgroundColor #f8f9fa
+    BorderColor #006185
+    ArrowColor #006185
+}
+
+title Tripon 시스템 아키텍처
+
+package "Client" {
+    [React Frontend] as frontend
+    [Image Uploader] as uploader
+    [Collage Grid] as collage
+    [Analysis Card] as analysis
+}
+
+package "Server" {
+    [API Gateway] as gateway
+    [Image Processing Service] as processing
+    [Analysis Service] as analysisService
+    [S3 Service] as s3
+}
+
+database "S3" {
+    [Image Storage] as storage
+}
+
+[User] as user
+
+user --> frontend: 사용자 인터랙션
+frontend --> uploader: 이미지 선택
+uploader --> gateway: 이미지 업로드 요청
+gateway --> processing: 이미지 처리 요청
+processing --> s3: 이미지 저장
+s3 --> storage: 이미지 저장
+processing --> analysisService: 분석 요청
+analysisService --> frontend: 분석 결과
+frontend --> collage: 콜라주 생성
+frontend --> analysis: 분석 결과 표시
+
+@enduml 

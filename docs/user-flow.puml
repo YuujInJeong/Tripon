@@ -1,0 +1,57 @@
+@startuml Tripon User Flow
+
+skinparam backgroundColor white
+skinparam handwritten false
+skinparam defaultFontName "Pretendard"
+skinparam defaultFontSize 14
+skinparam arrowColor #006185
+skinparam activityBorderColor #006185
+skinparam activityBackgroundColor #f8f9fa
+skinparam activityDiamondBackgroundColor #f8f9fa
+skinparam activityDiamondBorderColor #006185
+
+title Tripon 사용자 흐름도
+
+start
+
+:메인 페이지;
+if (이미지 개수 선택) then (4장)
+  :4장 선택;
+else (8장)
+  :8장 선택;
+endif
+
+:이미지 선택 페이지;
+if (이미지 선택) then (성공)
+  :이미지 업로드;
+  :이미지 압축;
+  :이미지 리사이징;
+  :S3 업로드;
+else (실패)
+  :에러 메시지 표시;
+  backward:다시 시도;
+endif
+
+:콜라주 페이지;
+if (이미지 배치) then (자동)
+  :자동 배치;
+else (수동)
+  :수동 배치;
+endif
+
+:분석 결과 페이지;
+if (저장/공유) then (저장)
+  :이미지 다운로드;
+else (공유)
+  if (공유 방식) then (카카오)
+    :카카오톡 공유;
+  else (인스타그램)
+    :인스타그램 공유;
+  else (기타)
+    :기본 공유;
+  endif
+endif
+
+stop
+
+@enduml 
